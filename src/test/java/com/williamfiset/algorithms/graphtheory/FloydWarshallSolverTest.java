@@ -3,8 +3,7 @@ package com.williamfiset.algorithms.graphtheory;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 public class FloydWarshallSolverTest {
 
@@ -13,7 +12,7 @@ public class FloydWarshallSolverTest {
 
   static double[][] matrix1, matrix2, matrix3;
 
-  @Before
+  @BeforeEach
   public void setup() {
     matrix1 =
         new double[][] {
@@ -205,5 +204,24 @@ public class FloydWarshallSolverTest {
     FloydWarshallSolver fw = new FloydWarshallSolver(m);
     List<Integer> fwPath = fw.reconstructShortestPath(s, e);
     assertThat(fwPath).isNull();
+  }
+
+  @Test
+  public void testSingleNodeNegativeCycleDetection() {
+    int n = 3, s = 0, e = n - 1;
+    double[][] m = createMatrix(n);
+    m[1][2] = 1000;
+    m[2][2] = -1;
+    m[1][0] = 1;
+    m[2][0] = 1;
+
+    FloydWarshallSolver solver = new FloydWarshallSolver(m);
+    double[][] soln = solver.getApspMatrix();
+
+    // 1 reaches 2 with cost 1000 and then it can go through the edge from 2 to 2 (which is -1) as
+    // many times as wanted and
+    // thus reach 2 with arbitrarily little cost
+    assertThat(soln[1][2]).isEqualTo(NEG_INF);
+    assertThat(soln[1][0]).isEqualTo(NEG_INF);
   }
 }
